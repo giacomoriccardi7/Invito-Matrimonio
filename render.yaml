@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: wedding-api
+    env: node
+    root: server
+    startCommand: node index.cjs
+    autoDeploy: true
+    plan: free
+    healthCheckPath: /
+    # Imposta le variabili ambiente nel dashboard di Render.
+    # Esempi chiavi richieste (valori da aggiungere come Secret su Render):
+    # envVars:
+    #   - key: CORS_ORIGIN
+    #     value: https://<frontend-host>
+    #   - key: GOOGLE_SHEET_ID
+    #     sync: false
+    #   - key: GOOGLE_KEY_FILE
+    #     value: credentials.json
+    #   - key: GOOGLE_SHEET_RANGE
+    #     value: Sheet1!A:H
+    #   - key: EMAIL_HOST
+    #     sync: false
+    #   - key: EMAIL_PORT
+    #     value: "465"
+    #   - key: EMAIL_SECURE
+    #     value: "true"
+    #   - key: EMAIL_USER
+    #     sync: false
+    #   - key: EMAIL_PASS
+    #     sync: false
+    #   - key: RECIPIENT_EMAIL
+    #     sync: false
+    #   - key: SUPABASE_URL
+    #     sync: false
+    #   - key: SUPABASE_SERVICE_ROLE_KEY
+    #     sync: false
