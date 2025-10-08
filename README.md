@@ -49,6 +49,8 @@ Vedi `DEPLOY.md` per una guida completa. Per Vercel (frontend) consulta `docs/VE
 ## Sicurezza
 - `.gitignore` esclude `.env`, `server/.env`, `server/credentials.json`, directory temporanee Supabase.
 - Non committare chiavi reali.
+- Non committare `dist/`: lascia che la piattaforma di deploy esegua la build.
+- Vedi `docs/SECURITY.md` per dettagli e rotazione chiavi.
 
 ## Note
 - Alcuni bundle superano 500 kB: valuta code splitting o ottimizzazione immagini.
