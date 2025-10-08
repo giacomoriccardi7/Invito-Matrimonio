@@ -1,0 +1,39 @@
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.env
+
+# Env files (keep examples only)
+.env.*
+!*.example
+
+# Server secrets
+server/.env
+server/credentials.json
+
+# Supabase local metadata
+supabase/**/.temp/
+supabase/**/.branches/
+
+# Legacy or local-only dirs
+server/node_modules_old/
+test_server/node_modules/
