@@ -6,7 +6,7 @@ services:
     startCommand: node index.cjs
     autoDeploy: true
     plan: free
-    healthCheckPath: /
+    healthCheckPath: /healthz
     # Imposta le variabili ambiente nel dashboard di Render.
     # Esempi chiavi richieste (valori da aggiungere come Secret su Render):
     # envVars:

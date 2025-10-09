@@ -41,7 +41,7 @@ export default function CountdownSection() {
             Sei invitato!
           </h2>
           <p className="text-base sm:text-lg text-neutral-600 mt-4 leading-relaxed max-w-md mx-auto animate-slide-up">
-            Ci piacerebbe che fossi parte di questo momento così speciale per noi. Manca poco!
+            Saremmo davvero felici di condividere con te questo momento così speciale della nostra vita. Manca poco!
           </p>
         </div>
 

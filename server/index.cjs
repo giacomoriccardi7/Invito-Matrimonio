@@ -48,6 +48,32 @@ app.get('/', (req, res) => {
   res.send('Wedding Invitation API Server');
 });
 
+// Health check endpoint
+app.get('/healthz', (req, res) => {
+  const status = {
+    status: 'ok',
+    uptime: process.uptime(),
+    corsOrigin: config.corsOrigin,
+    env: {
+      googleSheetId: Boolean(config.google.sheetId),
+      googleKeyFile: Boolean(config.google.keyFile),
+      googleSheetRange: Boolean(config.sheets.range),
+      emailHost: Boolean(config.email.host),
+      emailUser: Boolean(config.email.user),
+      emailPass: Boolean(config.email.pass),
+      recipientEmail: Boolean(config.email.recipient),
+      supabaseUrl: Boolean(config.supabase.url),
+      supabaseAnonKey: Boolean(config.supabase.anonKey)
+    }
+  };
+  res.json(status);
+});
+
+// Some platforms send HEAD for health checks; respond 200 quickly
+app.head('/healthz', (req, res) => {
+  res.status(200).end();
+});
+
 // API Routes
 app.use('/api/memories', memoriesRoutes);
 app.use('/api/rsvp', rsvpRoutes);

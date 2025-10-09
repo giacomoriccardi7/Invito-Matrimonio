@@ -5,19 +5,28 @@ const sharp = require('sharp');
 const supabaseUrl = config.supabase.url;
 const supabaseAnonKey = config.supabase.anonKey;
 
-// console.log('[Supabase Storage] Supabase URL:', supabaseUrl);
-// console.log('[Supabase Storage] Supabase Anon Key:', supabaseAnonKey);
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables in server/.env');
+// Inizializzazione lazy: evita crash all'avvio se Supabase non è configurato.
+let supabase = null;
+if (supabaseUrl && supabaseAnonKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+  } catch (err) {
+    // Mantieni null; verrà segnalato quando una funzione tenterà di usarlo
+    supabase = null;
+  }
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function getSupabase() {
+  if (!supabase) {
+    throw new Error('Missing Supabase environment variables in server/.env');
+  }
+  return supabase;
+}
 
 // Ensure required buckets exist (uses service role if available)
 async function ensureBucket(name) {
   try {
-    const { error } = await supabase.storage.createBucket(name, { public: true });
+    const { error } = await getSupabase().storage.createBucket(name, { public: true });
     if (error) {
       // Ignore if bucket already exists (409)
       if (error.status === 409 || error.statusCode === '409') {
@@ -108,7 +117,7 @@ const uploadMemory = async (fileBuffer, fileName, fileType, uploaderName, dedica
 
 const getMemories = async () => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('memories')
       .select('*')
       .order('created_at', { ascending: false });
@@ -125,7 +134,7 @@ const getMemories = async () => {
 
 const getApprovedMemories = async () => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('memories')
       .select('*')
       .eq('is_approved', true)
@@ -162,7 +171,7 @@ const updateMemoryApprovalStatus = async (id, isApproved) => {
 
 const logModerationAction = async (memoryId, action, actor) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('moderation_logs')
       .insert({ memory_id: memoryId, action, actor })
       .select()
@@ -177,7 +186,7 @@ const logModerationAction = async (memoryId, action, actor) => {
 
 const getPendingMemories = async () => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('memories')
       .select('*')
       .or('moderation_status.is.null,moderation_status.eq.pending')
@@ -193,7 +202,7 @@ const getPendingMemories = async () => {
 
 const getModerationHistory = async () => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('moderation_logs')
       .select('*')
       .order('created_at', { ascending: false })

@@ -64,6 +64,10 @@ Ricorda di aggiornare `VITE_BACKEND_URL` con l’URL pubblico del backend.
 - Add file `credentials.json` (Google) come Secret File e referenziarlo con `GOOGLE_KEY_FILE=credentials.json`
 - Port: auto, Render usa `PORT` env. Assicurati CORS: `CORS_ORIGIN=https://<frontend-host>`.
 
+### Health Check
+- Imposta `healthCheckPath: /healthz` in `render.yaml` o nel pannello di Render.
+- L'endpoint `GET /healthz` risponde con JSON e stato `ok` se il server è attivo e le variabili principali sono impostate.
+
 ### Rotte esposte
 - `GET /api/memories` – lista ricordi
 - `GET /api/memories/live` – ricordi approvati
@@ -77,6 +81,7 @@ Ricorda di aggiornare `VITE_BACKEND_URL` con l’URL pubblico del backend.
 - Controlla email ricevuta e riga aggiunta su Google Sheet.
 - Verifica SSE e gallery se attivate.
 - Controlla console del backend per CORS e errori.
+ - Verifica health check: apri `https://<backend-host>/healthz` e controlla che risponda con `{ status: "ok" }`.
 
 ## Troubleshooting
 - 4xx al `/api/rsvp`: controlla validazione campi e `GOOGLE_SHEET_RANGE`.
