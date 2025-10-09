@@ -12,7 +12,7 @@ Questa guida descrive come pubblicare online frontend (Vite/React) e backend (No
 - Account su Render/VPS per il backend Node.
 - Supabase progetto e chiavi (URL, ANON o SERVICE ROLE).
 - Google Sheets: sheet id e credenziali service account JSON (caricato come file nel backend).
-- SMTP valido per invio email RSVP.
+ - Email provider per RSVP: SMTP (es. Gmail con App Password) oppure Resend API.
 
 ## Configurazione Variabili
 ### Frontend (`.env`)
@@ -31,15 +31,26 @@ CORS_ORIGIN=https://<frontend-host>
 GOOGLE_SHEET_ID=<id>
 GOOGLE_KEY_FILE=credentials.json
 GOOGLE_SHEET_RANGE=Sheet1!A:H
+## Opzione A: SMTP (Gmail consigliato con App Password)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=465
 EMAIL_SECURE=true
 EMAIL_USER=<email>
 EMAIL_PASS=<app_password>
+
+## Opzione B: Resend (fallback o sostituto di SMTP)
+RESEND_API_KEY=<resend_api_key>
+RESEND_FROM="RSVP Wedding <onboarding@resend.dev>"
+
+## Destinatario per notifiche RSVP
 RECIPIENT_EMAIL=<destinatario>
 SUPABASE_URL=https://<supabase-url>
 SUPABASE_SERVICE_ROLE_KEY=<service_role_key>
 ```
+
+Note:
+- È sufficiente configurare uno tra SMTP o Resend. Se SMTP fallisce (es. timeout su Render), il backend usa automaticamente Resend come fallback se `RESEND_API_KEY` è impostata.
+- `RESEND_FROM` può essere `onboarding@resend.dev` (senza verifica dominio) oppure un mittente del tuo dominio dopo verifica su Resend.
 
 ## Build Frontend
 Da root progetto:
@@ -63,6 +74,10 @@ Ricorda di aggiornare `VITE_BACKEND_URL` con l’URL pubblico del backend.
 - Environment: `server/.env` variabili
 - Add file `credentials.json` (Google) come Secret File e referenziarlo con `GOOGLE_KEY_FILE=credentials.json`
 - Port: auto, Render usa `PORT` env. Assicurati CORS: `CORS_ORIGIN=https://<frontend-host>`.
+ - Aggiungi variabili email:
+   - Se SMTP: `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE`, `EMAIL_USER`, `EMAIL_PASS`
+   - Se Resend: `RESEND_API_KEY`, `RESEND_FROM` (opzionale)
+   - Sempre: `RECIPIENT_EMAIL`
 
 ### Health Check
 - Imposta `healthCheckPath: /healthz` in `render.yaml` o nel pannello di Render.
@@ -82,12 +97,14 @@ Ricorda di aggiornare `VITE_BACKEND_URL` con l’URL pubblico del backend.
 - Verifica SSE e gallery se attivate.
 - Controlla console del backend per CORS e errori.
  - Verifica health check: apri `https://<backend-host>/healthz` e controlla che risponda con `{ status: "ok" }`.
+ - Verifica provider email: chiama `GET https://<backend-host>/api/email/verify` e attendi `{ ok: true }`. Se SMTP non è disponibile ma `RESEND_API_KEY` è impostata, la verifica usa Resend.
 
 ## Troubleshooting
 - 4xx al `/api/rsvp`: controlla validazione campi e `GOOGLE_SHEET_RANGE`.
 - 5xx: verifica credenziali Google o SMTP.
 - CORS: imposta `CORS_ORIGIN` corretto.
 - Supabase error: verifica `SUPABASE_URL` e chiave.
+ - Email timeout su Render: configura `RESEND_API_KEY` per usare l’invio via API come fallback.
 
 ## Aggiornamenti
 Per nuove modifiche:

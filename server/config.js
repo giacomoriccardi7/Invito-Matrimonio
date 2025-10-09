@@ -12,7 +12,9 @@ const config = {
     secure: String(process.env.EMAIL_SECURE || 'true') === 'true',
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
-    recipient: process.env.RECIPIENT_EMAIL
+    recipient: process.env.RECIPIENT_EMAIL,
+    resendApiKey: process.env.RESEND_API_KEY,
+    resendFrom: process.env.RESEND_FROM || 'onboarding@resend.dev'
   },
   sheets: {
     range: process.env.GOOGLE_SHEET_RANGE || 'Sheet1!A:H',
@@ -27,9 +29,15 @@ const config = {
 function validateConfig() {
   const missing = [];
   if (!config.google.sheetId) missing.push('GOOGLE_SHEET_ID');
-  if (!config.email.host) missing.push('EMAIL_HOST');
-  if (!config.email.user) missing.push('EMAIL_USER');
-  if (!config.email.pass) missing.push('EMAIL_PASS');
+  const hasSMTP = Boolean(config.email.host && config.email.user && config.email.pass);
+  const hasResend = Boolean(config.email.resendApiKey);
+  if (!hasSMTP && !hasResend) {
+    // Richiedi almeno un provider email: SMTP o Resend
+    if (!config.email.host) missing.push('EMAIL_HOST');
+    if (!config.email.user) missing.push('EMAIL_USER');
+    if (!config.email.pass) missing.push('EMAIL_PASS');
+    if (!config.email.resendApiKey) missing.push('RESEND_API_KEY');
+  }
   if (!config.email.recipient) missing.push('RECIPIENT_EMAIL');
   if (!config.supabase.url) missing.push('SUPABASE_URL');
   if (!config.supabase.anonKey) missing.push('SUPABASE_ANON_KEY');

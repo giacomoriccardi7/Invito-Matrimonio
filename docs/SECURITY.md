@@ -18,7 +18,19 @@ Se un segreto finisce nel repository (anche solo per errore), **ruota immediatam
 ## Controlli
 - Il workflow CI in `.github/workflows/prevent-dist-and-secrets.yml` fallisce la build se:
   - `dist/` è presente nel commit.
-  - Esistono pattern di segreti in `src/`, `public/`, `dist/`, `index.html`.
+  - Esistono assegnazioni con valori letterali sospetti in `src/`, `public/`, `.github`, `index.html`.
+
+## .env.production (frontend)
+- Non committare `.env.production` o altri file `.env*` del frontend: devono risiedere solo in locale e nella piattaforma di deploy (Vercel/Netlify) come variabili.
+- In Vite usa esclusivamente riferimenti `import.meta.env.VITE_*`; non inserire chiavi direttamente nel codice.
+- Esempio locale:
+  - `frontend/.env.development` (solo locale)
+  - `frontend/.env.production` (solo locale, mai committato)
+  - In produzione, definisci le stesse variabili su Vercel/Netlify (Environment Variables) invece del file.
+
+## Backend
+- Mantieni i segreti (es. `GOOGLE_SERVICE_ACCOUNT` JSON, `EMAIL_PASS`) solo come secret della piattaforma o file privati non tracciati (`server/.env`, `server/credentials.json` ignorati da git).
+- Non esportare segreti verso il frontend; se necessario, usa chiavi pubbliche (es. Supabase anon key) solo via `import.meta.env` e configurate nel provider di hosting.
 
 ## Pulizia della storia (opzionale)
 Se `dist/` o un segreto sono stati committati in passato, valuta la rimozione dalla storia con `git filter-repo` o BFG, quindi force-push.

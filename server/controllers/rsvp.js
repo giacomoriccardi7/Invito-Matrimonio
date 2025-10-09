@@ -46,7 +46,7 @@ async function handleRsvp(req, res) {
     if (err?.type === 'config_error' || err?.type === 'range_error') {
       return res.status(400).json({ error: err.message, hint: err.hint, details: err.details });
     }
-    return res.status(500).json({ error: 'Errore salvataggio su Google Sheets', details: err?.details });
+    return res.status(500).json({ error: 'Errore salvataggio su Google Sheets', hint: err?.hint, message: err?.message, details: err?.details });
   }
 
   try {

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: wedding-api
+    name: invito-matrimonio
     env: node
     root: server
     startCommand: node index.cjs
@@ -30,6 +30,10 @@ services:
     #     sync: false
     #   - key: RECIPIENT_EMAIL
     #     sync: false
+    #   - key: RESEND_API_KEY
+    #     sync: false
+    #   - key: RESEND_FROM
+    #     value: "RSVP Wedding <onboarding@resend.dev>"
     #   - key: SUPABASE_URL
     #     sync: false
     #   - key: SUPABASE_SERVICE_ROLE_KEY

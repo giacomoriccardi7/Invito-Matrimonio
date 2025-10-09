@@ -19,7 +19,15 @@ function readServiceAccountCredentials() {
 
 async function getSheetsClient() {
   const credentials = readServiceAccountCredentials();
-  const { client_email, private_key } = credentials || {};
+  if (!credentials || !credentials.client_email || !credentials.private_key) {
+    throw {
+      type: 'config_error',
+      message: 'File credenziali Google mancante o non valido',
+      hint: `Assicurati che '${config.google.keyFile}' esista e contenga 'client_email' e 'private_key'. Aggiorna GOOGLE_KEY_FILE se necessario.`,
+      details: { keyFile: config.google.keyFile }
+    };
+  }
+  const { client_email, private_key } = credentials;
   const jwt = new google.auth.JWT({
     email: client_email,
     key: private_key,
@@ -61,11 +69,22 @@ async function appendRSVPRow({ nomeCognome, partecipazione, nomiPartecipanti, in
       resource: { values: [newRow] },
     });
   } catch (err) {
-    const causeStatus = err?.cause?.status || err?.status;
-    const causeMessage = err?.cause?.message || err?.message;
+    const causeStatus = err?.response?.status || err?.cause?.status || err?.status;
+    const causeMessage = err?.response?.data?.error?.message || err?.cause?.message || err?.message;
+    const sheetTitle = (config.sheets.range || '').split('!')[0] || 'Sheet1';
+    const creds = readServiceAccountCredentials();
+    const serviceEmail = creds?.client_email;
     // Normalizza errori frequenti: range non valido o foglio inesistente
     if (causeMessage?.includes('Unable to parse range')) {
       throw { type: 'range_error', message: 'Intervallo Google Sheets non valido', hint: `Controlla GOOGLE_SHEET_RANGE (attuale: ${config.sheets.range})`, details: { status: causeStatus, message: causeMessage } };
+    }
+    if (String(causeStatus) === '404' || /Requested entity was not found/i.test(String(causeMessage))) {
+      throw {
+        type: 'sheets_error',
+        message: 'Foglio non trovato o accesso negato',
+        hint: `Verifica GOOGLE_SHEET_ID e condividi il documento con ${serviceEmail || 'il Service Account'} (Editor). Assicurati che il tab '${sheetTitle}' esista o aggiorna GOOGLE_SHEET_RANGE.`,
+        details: { status: causeStatus, message: causeMessage }
+      };
     }
     throw { type: 'sheets_error', message: 'Errore in append su Google Sheets', details: { status: causeStatus, message: causeMessage } };
   }

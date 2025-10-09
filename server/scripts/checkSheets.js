@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
