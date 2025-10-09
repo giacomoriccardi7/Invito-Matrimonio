@@ -49,14 +49,17 @@ async function handleRsvp(req, res) {
     return res.status(500).json({ error: 'Errore salvataggio su Google Sheets', hint: err?.hint, message: err?.message, details: err?.details });
   }
 
-  try {
-    await sendRSVPNotification(data);
-  } catch (err) {
-    console.error('[RSVP] Errore invio email:', err);
-    // Non blocchiamo la risposta per errore email: informiamo il client ma manteniamo success
-    return res.status(200).json({ success: true, warning: 'RSVP salvato, ma invio email fallito', emailError: err });
-  }
+  // Invia l'email in background per evitare di bloccare la risposta
+  Promise.resolve()
+    .then(() => sendRSVPNotification(data))
+    .then(() => {
+      try { console.log('[RSVP] Notifica email inviata'); } catch {}
+    })
+    .catch((err) => {
+      try { console.error('[RSVP] Errore invio email (async):', err); } catch {}
+    });
 
+  // Rispondi subito: la UI non resta in attesa dell'invio email
   return res.status(200).json({ success: true });
 }
 

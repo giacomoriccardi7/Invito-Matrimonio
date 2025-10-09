@@ -14,6 +14,9 @@ function createTransport() {
     // secure true for 465, false for 587; configurable via env
     secure: config.email.secure,
     requireTLS: true,
+    // Riduci tempi di attesa per connessioni SMTP su piattaforme che bloccano
+    connectionTimeout: 5000, // ms
+    socketTimeout: 5000, // ms
     tls: { minVersion: 'TLSv1.2' },
     auth: {
       user: config.email.user,
@@ -55,32 +58,12 @@ function createRSVPEmailTemplate({ nomeCognome, partecipazione, intolleranze, me
 }
 
 async function sendRSVPNotification(rsvpData) {
-  // Priorità: prova SMTP. Se fallisce con timeout/connessione su Render, usa Resend come fallback se configurato.
+  // Preferisci Resend se configurato: è rapido e non soffre dei timeout SMTP su Render.
   const mailOptions = createRSVPEmailTemplate(rsvpData);
-  const useSMTP = Boolean(config.email.host && config.email.user && config.email.pass);
+  const hasResend = Boolean(config.email.resendApiKey && Resend);
+  const hasSMTP = Boolean(config.email.host && config.email.user && config.email.pass);
 
-  if (useSMTP) {
-    const transporter = createTransport();
-    try {
-      await transporter.verify();
-      await transporter.sendMail(mailOptions);
-      return;
-    } catch (err) {
-      // Se SMTP non va e abbiamo Resend, prosegui con fallback
-      const isConnError = ['ETIMEDOUT', 'ECONNREFUSED', 'ENOTFOUND'].includes(err?.code);
-      if (!config.email.resendApiKey || !Resend || (!isConnError && err?.code !== 'EAUTH')) {
-        throw {
-          type: 'email_config',
-          message: 'Invio email fallito via SMTP',
-          hint: 'Verifica App Password Gmail, porta e secure. In alternativa configura RESEND_API_KEY.',
-          details: { message: err?.message || String(err), code: err?.code, command: err?.command }
-        };
-      }
-    }
-  }
-
-  // Fallback: Resend API
-  if (config.email.resendApiKey && Resend) {
+  if (hasResend) {
     const client = new Resend(config.email.resendApiKey);
     const from = config.email.resendFrom || `RSVP Wedding <${config.email.user || 'no-reply@domain.com'}>`;
     const payload = {
@@ -90,46 +73,54 @@ async function sendRSVPNotification(rsvpData) {
       html: mailOptions.html,
     };
     const result = await client.emails.send(payload);
-    if (result?.error) {
-      throw {
-        type: 'email_resend_error',
-        message: 'Invio email fallito via Resend',
-        details: result.error
-      };
+    if (!result?.error) return;
+    // Se Resend fallisce ed esiste SMTP, prova SMTP come fallback
+    if (!hasSMTP) {
+      throw { type: 'email_resend_error', message: 'Invio email fallito via Resend', details: result.error };
     }
-    return;
   }
 
-  // Nessun provider disponibile
-  throw {
-    type: 'email_no_provider',
-    message: 'Nessun provider email configurato (SMTP o RESEND_API_KEY)'
-  };
+  if (hasSMTP) {
+    const transporter = createTransport();
+    try {
+      await transporter.sendMail(mailOptions);
+      return;
+    } catch (err) {
+      throw {
+        type: 'email_smtp_error',
+        message: 'Invio email fallito via SMTP',
+        hint: 'Verifica host, porta, secure e App Password. Su Render considera Resend.',
+        details: { message: err?.message || String(err), code: err?.code, command: err?.command }
+      };
+    }
+  }
+
+  throw { type: 'email_no_provider', message: 'Nessun provider email configurato (SMTP o RESEND_API_KEY)' };
 }
 
 async function verifySMTP() {
+  // Preferisci Resend per una verifica rapida se disponibile
+  if (config.email.resendApiKey && Resend) {
+    try {
+      const client = new Resend(config.email.resendApiKey);
+      const result = await client.emails.send({
+        from: config.email.resendFrom || `RSVP Wedding <${config.email.user || 'no-reply@domain.com'}>`,
+        to: config.email.recipient,
+        subject: 'Verifica Configurazione Email (Resend)',
+        html: '<p>Verifica automatica configurazione Resend.</p>'
+      });
+      if (!result?.error) return { ok: true, via: 'resend' };
+      return { ok: false, error: result.error };
+    } catch (e) {
+      return { ok: false, error: { message: e?.message || String(e) } };
+    }
+  }
+
   const transporter = createTransport();
   try {
     await transporter.verify();
     return { ok: true };
   } catch (err) {
-    // Se SMTP fallisce, prova Resend come verifica alternativa
-    if (config.email.resendApiKey && Resend) {
-      try {
-        const client = new Resend(config.email.resendApiKey);
-        // Verifica minimale: chiama API per ottenere un token valido inviando un'email di prova a se stessi con tag
-        const result = await client.emails.send({
-          from: config.email.resendFrom || `RSVP Wedding <${config.email.user || 'no-reply@domain.com'}>`,
-          to: config.email.recipient,
-          subject: 'Verifica Configurazione Email (Resend)',
-          html: '<p>Verifica automatica configurazione Resend.</p>'
-        });
-        if (!result?.error) return { ok: true, via: 'resend' };
-        return { ok: false, error: result.error };
-      } catch (e) {
-        return { ok: false, error: { message: e?.message || String(e) } };
-      }
-    }
     return { ok: false, error: { message: err?.message || String(err), code: err?.code, command: err?.command } };
   }
 }
