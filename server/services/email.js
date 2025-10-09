@@ -7,6 +7,13 @@ try {
   Resend = null;
 }
 
+function getRecipientsList() {
+  const raw = String(config.email.recipient || '').trim();
+  if (!raw) return [];
+  // Supporta lista separata da virgola, rimuove spazi
+  return raw.split(',').map(s => s.trim()).filter(Boolean);
+}
+
 function createTransport() {
   return nodemailer.createTransport({
     host: config.email.host,
@@ -62,13 +69,18 @@ async function sendRSVPNotification(rsvpData) {
   const mailOptions = createRSVPEmailTemplate(rsvpData);
   const hasResend = Boolean(config.email.resendApiKey && Resend);
   const hasSMTP = Boolean(config.email.host && config.email.user && config.email.pass);
+  const recipients = getRecipientsList();
+  if (!recipients.length) {
+    throw { type: 'email_no_recipient', message: 'RECIPIENT_EMAIL mancante o vuoto' };
+  }
 
   if (hasResend) {
     const client = new Resend(config.email.resendApiKey);
     const from = config.email.resendFrom || `RSVP Wedding <${config.email.user || 'no-reply@domain.com'}>`;
     const payload = {
       from,
-      to: mailOptions.to,
+      // Resend accetta string o array: passiamo array normalizzato
+      to: recipients,
       subject: mailOptions.subject,
       html: mailOptions.html,
     };
@@ -83,7 +95,8 @@ async function sendRSVPNotification(rsvpData) {
   if (hasSMTP) {
     const transporter = createTransport();
     try {
-      await transporter.sendMail(mailOptions);
+      const smtpOpts = { ...mailOptions, to: recipients.join(', ') };
+      await transporter.sendMail(smtpOpts);
       return;
     } catch (err) {
       throw {
@@ -103,9 +116,11 @@ async function verifySMTP() {
   if (config.email.resendApiKey && Resend) {
     try {
       const client = new Resend(config.email.resendApiKey);
+      const recipients = getRecipientsList();
+      const testTo = recipients[0] || config.email.user;
       const result = await client.emails.send({
         from: config.email.resendFrom || `RSVP Wedding <${config.email.user || 'no-reply@domain.com'}>`,
-        to: config.email.recipient,
+        to: testTo,
         subject: 'Verifica Configurazione Email (Resend)',
         html: '<p>Verifica automatica configurazione Resend.</p>'
       });
