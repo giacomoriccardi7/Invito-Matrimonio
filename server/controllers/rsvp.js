@@ -54,7 +54,7 @@ async function handleRsvp(req, res) {
   } catch (err) {
     console.error('[RSVP] Errore invio email:', err);
     // Non blocchiamo la risposta per errore email: informiamo il client ma manteniamo success
-    return res.status(200).json({ success: true, warning: 'RSVP salvato, ma invio email fallito' });
+    return res.status(200).json({ success: true, warning: 'RSVP salvato, ma invio email fallito', emailError: err });
   }
 
   return res.status(200).json({ success: true });

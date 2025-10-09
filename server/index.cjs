@@ -9,6 +9,7 @@ const config = require('./config');
 const memoriesRoutes = require('./routes/memoriesRoutes');
 const rsvpRoutes = require('./routes/rsvpRoutes');
 const moderationRoutes = require('./routes/moderationRoutes');
+const emailRoutes = require('./routes/emailRoutes');
 
 const app = express();
 const PORT = config.port || 3001;
@@ -78,6 +79,7 @@ app.head('/healthz', (req, res) => {
 app.use('/api/memories', memoriesRoutes);
 app.use('/api/rsvp', rsvpRoutes);
 app.use('/api/moderation', moderationRoutes);
+app.use('/api/email', emailRoutes);
 
 // SSE endpoint for live feed updates
 app.get('/api/memories/events', (req, res) => {

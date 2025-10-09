@@ -5,7 +5,10 @@ function createTransport() {
   return nodemailer.createTransport({
     host: config.email.host,
     port: config.email.port,
+    // secure true for 465, false for 587; configurable via env
     secure: config.email.secure,
+    requireTLS: true,
+    tls: { minVersion: 'TLSv1.2' },
     auth: {
       user: config.email.user,
       pass: config.email.pass,
@@ -56,7 +59,7 @@ async function sendRSVPNotification(rsvpData) {
       type: 'email_config',
       message: 'Configurazione SMTP non valida',
       hint: 'Per Gmail usa host smtp.gmail.com, porta 465, secure=true e una App Password.',
-      details: { message: causeMessage }
+      details: { message: causeMessage, code: err?.code, command: err?.command }
     };
   }
 
@@ -64,4 +67,14 @@ async function sendRSVPNotification(rsvpData) {
   await transporter.sendMail(mailOptions);
 }
 
-module.exports = { sendRSVPNotification };
+async function verifySMTP() {
+  const transporter = createTransport();
+  try {
+    await transporter.verify();
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: { message: err?.message || String(err), code: err?.code, command: err?.command } };
+  }
+}
+
+module.exports = { sendRSVPNotification, verifySMTP };
