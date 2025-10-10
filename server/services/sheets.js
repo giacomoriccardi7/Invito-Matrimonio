@@ -2,7 +2,13 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const config = require('../config');
 
+// Cache per ridurre la latenza: evita rilettura credenziali e ri-autenticazione
+let cachedCredentials = null;
+let cachedJwt = null;
+let cachedSheets = null;
+
 function readServiceAccountCredentials() {
+  if (cachedCredentials) return cachedCredentials;
   try {
     const raw = fs.readFileSync(config.google.keyFile, 'utf8');
     const json = JSON.parse(raw);
@@ -10,7 +16,8 @@ function readServiceAccountCredentials() {
     if (!client_email || !private_key) {
       throw new Error('Credenziali Google non valide');
     }
-    return { client_email, private_key };
+    cachedCredentials = { client_email, private_key };
+    return cachedCredentials;
   } catch (err) {
     console.warn('[GoogleAuth] Impossibile leggere le credenziali dal file:', err?.message || err);
     return null;
@@ -18,6 +25,7 @@ function readServiceAccountCredentials() {
 }
 
 async function getSheetsClient() {
+  if (cachedSheets) return cachedSheets;
   const credentials = readServiceAccountCredentials();
   if (!credentials || !credentials.client_email || !credentials.private_key) {
     throw {
@@ -27,14 +35,21 @@ async function getSheetsClient() {
       details: { keyFile: config.google.keyFile }
     };
   }
-  const { client_email, private_key } = credentials;
-  const jwt = new google.auth.JWT({
-    email: client_email,
-    key: private_key,
-    scopes: config.google.scopes,
-  });
-  await jwt.authorize();
-  return google.sheets({ version: 'v4', auth: jwt });
+  try {
+    cachedJwt = new google.auth.JWT({
+      email: credentials.client_email,
+      key: credentials.private_key,
+      scopes: config.google.scopes,
+    });
+    await cachedJwt.authorize();
+    cachedSheets = google.sheets({ version: 'v4', auth: cachedJwt });
+    return cachedSheets;
+  } catch (e) {
+    // Reset cache su errore di auth
+    cachedJwt = null;
+    cachedSheets = null;
+    throw e;
+  }
 }
 
 function assertSheetsConfig() {
