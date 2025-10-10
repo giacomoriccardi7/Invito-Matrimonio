@@ -8,12 +8,15 @@ export default function HeroSection() {
 
   return (
     <section className="relative h-screen flex items-start lg:items-center justify-center overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-no-repeat bg-[center_50%] md:bg-[center_46%] lg:bg-[center_56%] xl:bg-[center_63%]"
-        style={{
-          backgroundImage: 'url(/images/photoHeader.jpg)'
-        }}
-      >
+      <div className="absolute inset-0">
+        <img
+          src="/images/photoHeader.jpg"
+          alt="Foto di copertina del matrimonio di Giacomo e Giulia"
+          className="w-full h-full object-cover bg-no-repeat bg-[center_50%] md:bg-[center_46%] lg:bg-[center_56%] xl:bg-[center_63%]"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
         <div className="absolute inset-0 bg-black/40"></div>
       </div>
 
