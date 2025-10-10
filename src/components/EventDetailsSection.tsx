@@ -44,7 +44,8 @@ export default function EventDetailsSection() {
         {event.title}
       </h3>
       <p className="font-elegant text-neutral-800 mb-2 text-xl md:text-2xl">
-        {isChurch ? 'Ti aspettiamo per la cerimonia presso ' : 'Ti aspettiamo per il ricevimento presso '}
+        {isChurch ? 'Ti aspettiamo per la cerimonia presso:' : 'Ti aspettiamo per il ricevimento presso:'}
+        <br />
         <span className="italic">{event.location}</span>
       </p>
       <p className="font-elegant text-neutral-800 mb-6 text-2xl md:text-3xl">

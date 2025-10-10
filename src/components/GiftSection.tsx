@@ -43,7 +43,7 @@ export default function GiftSection() {
             </button>
             <h4 className="font-serif text-2xl text-neutral-800 mb-4 text-center">DATI BANCARI</h4>
             <div className="text-left text-neutral-700 space-y-2">
-              <p><strong>IBAN:</strong> IT79W0347501605CC0012827993</p>
+              <p className="whitespace-nowrap text-sm sm:text-base overflow-x-auto"><strong>IBAN:</strong> IT79W0347501605CC0012827993</p>
               <p><strong>Intestatario:</strong> Giacomo Riccardi</p>
             </div>
           </div>
