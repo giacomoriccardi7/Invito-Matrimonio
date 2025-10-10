@@ -170,4 +170,35 @@ async function verifySMTP() {
   }
 }
 
-module.exports = { sendRSVPNotification, verifySMTP };
+async function sendTestEmail(to) {
+  const subject = 'Test deliverability RSVP';
+  const html = '<p>Test di consegna email dal backend RSVP.</p>';
+  const hasResend = Boolean(config.email.resendApiKey && Resend);
+  const hasSMTP = Boolean(config.email.host && config.email.user && config.email.pass);
+
+  if (hasResend) {
+    try {
+      const client = new Resend(config.email.resendApiKey);
+      const from = config.email.resendFrom || `RSVP Wedding <${config.email.user || 'no-reply@domain.com'}>`;
+      const result = await client.emails.send({ from, to, subject, html });
+      if (!result?.error) return { ok: true, via: 'resend' };
+      if (!hasSMTP) return { ok: false, via: 'resend', error: result.error };
+    } catch (e) {
+      if (!hasSMTP) return { ok: false, via: 'resend', error: { message: e?.message || String(e) } };
+    }
+  }
+
+  if (hasSMTP) {
+    try {
+      const transporter = createTransport();
+      await transporter.sendMail({ from: `RSVP Wedding <${config.email.user}>`, to, subject, html });
+      return { ok: true, via: 'smtp' };
+    } catch (err) {
+      return { ok: false, via: 'smtp', error: { message: err?.message || String(err), code: err?.code, command: err?.command } };
+    }
+  }
+
+  return { ok: false, error: { message: 'Nessun provider email configurato' } };
+}
+
+module.exports = { sendRSVPNotification, verifySMTP, sendTestEmail };
