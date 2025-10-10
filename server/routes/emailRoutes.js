@@ -5,10 +5,11 @@ const { verifySMTP, sendTestEmail } = require('../services/email');
 router.get('/verify', async (req, res) => {
   const to = String(req.query?.to || '').trim();
   const debug = String(req.query?.debug || '').trim();
+  const provider = String(req.query?.provider || '').trim().toLowerCase();
   const wantDebug = debug === '1' || debug.toLowerCase() === 'true';
   try {
     if (to) {
-      const result = await sendTestEmail(to);
+      const result = await sendTestEmail(to, { provider });
       const status = result.ok ? 200 : 500;
       return res.status(status).json(result);
     }
