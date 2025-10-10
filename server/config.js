@@ -1,3 +1,13 @@
+function sanitizeResendFrom(value) {
+  if (!value) return undefined;
+  let s = String(value).trim();
+  // Rimuove virgolette avvolgenti ("..." o '...') se presenti
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 const config = {
   port: process.env.PORT || 3001,
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
@@ -14,7 +24,7 @@ const config = {
     pass: process.env.EMAIL_PASS,
     recipient: process.env.RECIPIENT_EMAIL,
     resendApiKey: process.env.RESEND_API_KEY,
-    resendFrom: process.env.RESEND_FROM || 'onboarding@resend.dev'
+    resendFrom: sanitizeResendFrom(process.env.RESEND_FROM) || 'onboarding@resend.dev'
   },
   sheets: {
     range: process.env.GOOGLE_SHEET_RANGE || 'Sheet1!A:H',
