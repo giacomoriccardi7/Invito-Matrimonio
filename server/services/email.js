@@ -77,19 +77,49 @@ async function sendRSVPNotification(rsvpData) {
   if (hasResend) {
     const client = new Resend(config.email.resendApiKey);
     const from = config.email.resendFrom || `RSVP Wedding <${config.email.user || 'no-reply@domain.com'}>`;
-    const payload = {
-      from,
-      // Resend accetta string o array: passiamo array normalizzato
-      to: recipients,
-      subject: mailOptions.subject,
-      html: mailOptions.html,
-    };
-    const result = await client.emails.send(payload);
-    if (!result?.error) return;
-    // Se Resend fallisce ed esiste SMTP, prova SMTP come fallback
-    if (!hasSMTP) {
-      throw { type: 'email_resend_error', message: 'Invio email fallito via Resend', details: result.error };
+    // Invia per destinatario per gestire failure granulari
+    const sendPromises = recipients.map((to) =>
+      client.emails.send({ from, to, subject: mailOptions.subject, html: mailOptions.html })
+        .then((res) => ({ to, ok: !res?.error, error: res?.error }))
+        .catch((e) => ({ to, ok: false, error: { message: e?.message || String(e) } }))
+    );
+    const results = await Promise.allSettled(sendPromises);
+    const statuses = results.map(r => r.status === 'fulfilled' ? r.value : r.reason);
+    const failures = statuses.filter(s => !s.ok);
+    const successes = statuses.filter(s => s.ok);
+    if (successes.length === recipients.length) {
+      return; // tutte inviate via Resend
     }
+    // Se alcune falliscono e SMTP è disponibile, prova fallback su quelle
+    if (failures.length && hasSMTP) {
+      const transporter = createTransport();
+      const failedRecipients = failures.map(f => f.to).filter(Boolean);
+      try {
+        const smtpOpts = { ...mailOptions, to: failedRecipients.join(', ') };
+        await transporter.sendMail(smtpOpts);
+        return;
+      } catch (err) {
+        // Se almeno una era andata con Resend, segnala ma non blocca totalmente
+        if (successes.length) {
+          throw {
+            type: 'email_partial_failure',
+            message: 'Alcuni destinatari non hanno ricevuto via Resend e SMTP è fallito',
+            details: { failures, smtpError: { message: err?.message || String(err), code: err?.code, command: err?.command } }
+          };
+        }
+        throw {
+          type: 'email_smtp_error',
+          message: 'Invio email fallito via SMTP (fallback)',
+          hint: 'Verifica host, porta, secure e App Password. Su Render considera Resend.',
+          details: { message: err?.message || String(err), code: err?.code, command: err?.command }
+        };
+      }
+    }
+    // Se non c'è SMTP e ci sono fallimenti, segnala errore
+    if (failures.length && !hasSMTP) {
+      throw { type: 'email_resend_error', message: 'Invio parziale via Resend: alcuni destinatari falliti', details: { failures } };
+    }
+    return;
   }
 
   if (hasSMTP) {
