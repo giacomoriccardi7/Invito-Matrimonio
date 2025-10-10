@@ -62,6 +62,8 @@ app.get('/healthz', (req, res) => {
       emailHost: Boolean(config.email.host),
       emailUser: Boolean(config.email.user),
       emailPass: Boolean(config.email.pass),
+      emailResendApiKey: Boolean(config.email.resendApiKey),
+      emailResendFrom: Boolean(config.email.resendFrom),
       recipientEmail: Boolean(config.email.recipient),
       supabaseUrl: Boolean(config.supabase.url),
       supabaseAnonKey: Boolean(config.supabase.anonKey)
