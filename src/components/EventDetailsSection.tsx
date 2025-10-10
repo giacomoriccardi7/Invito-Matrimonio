@@ -22,7 +22,7 @@ export default function EventDetailsSection() {
       <div className="flex justify-center mb-4">
         {isChurch ? (
           <img
-            src="https://weddingfy.app/recursos/iconos/anillosN.gif"
+            src="/images/anillosN.gif"
             style={{ width: '90px' }}
             alt="Icona Cerimonia"
             loading="lazy"
