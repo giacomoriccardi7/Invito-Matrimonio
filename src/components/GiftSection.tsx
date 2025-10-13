@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Gift, X } from 'lucide-react';
+import { Player } from '@lottiefiles/react-lottie-player';
+import { X } from 'lucide-react';
 
 export default function GiftSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -9,7 +10,12 @@ export default function GiftSection() {
       <div className="max-w-md mx-auto text-center">
         <div className="flex justify-center mb-6">
           <div className="w-[120px] h-[120px] rounded-full bg-white shadow-sm flex items-center justify-center border border-neutral-200 animate-fade-in">
-            <Gift size={72} className="text-neutral-700" strokeWidth={1.5} />
+            <Player
+              autoplay
+              loop
+              src="https://assets6.lottiefiles.com/private_files/lf30_y0mCTl.json"
+              style={{ height: '90px', width: '90px' }}
+            />
           </div>
         </div>
         <h3 className="font-sans text-lg uppercase tracking-wider text-neutral-800 mb-4">
