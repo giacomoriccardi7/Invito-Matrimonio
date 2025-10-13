@@ -9,14 +9,12 @@ export default function GiftSection() {
     <section id="gifts" className="py-16 sm:py-20 lg:py-24 px-4 bg-neutral-100 reveal">
       <div className="max-w-md mx-auto text-center">
         <div className="flex justify-center mb-6">
-          <div className="w-[120px] h-[120px] rounded-full bg-white shadow-sm flex items-center justify-center border border-neutral-200 animate-fade-in">
-            <Player
-              autoplay
-              loop
-              src="https://assets6.lottiefiles.com/private_files/lf30_y0mCTl.json"
-              style={{ height: '90px', width: '90px' }}
-            />
-          </div>
+          <Player
+            autoplay
+            loop
+            src="https://assets6.lottiefiles.com/private_files/lf30_y0mCTl.json"
+            style={{ height: '150px', width: '150px' }}
+          />
         </div>
         <h3 className="font-sans text-lg uppercase tracking-wider text-neutral-800 mb-4">
           REGALI
