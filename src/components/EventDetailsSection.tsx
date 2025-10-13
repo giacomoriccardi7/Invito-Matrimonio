@@ -46,7 +46,7 @@ export default function EventDetailsSection() {
       <p className="font-elegant text-neutral-800 mb-2 text-lg sm:text-xl md:text-2xl">
         {isChurch ? 'Ti aspettiamo per la cerimonia presso:' : 'Ti aspettiamo per il ricevimento presso:'}
         <br />
-        <span className="italic block w-full whitespace-nowrap overflow-hidden text-ellipsis">{event.location}</span>
+        <span className="italic block w-full whitespace-normal break-words">{event.location}</span>
       </p>
       <p className="font-elegant text-neutral-800 mb-6 text-2xl md:text-3xl">
         <span className="font-semibold">Ore {event.time}</span>
@@ -67,7 +67,7 @@ export default function EventDetailsSection() {
 
   return (
     <section className="py-12 px-4 bg-white">
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-xl md:max-w-2xl mx-auto">
         <EventCard event={ceremony} isChurch={true} />
         <div className="w-32 h-0.5 bg-neutral-300 mx-auto my-8"></div>
         <EventCard event={reception} />
