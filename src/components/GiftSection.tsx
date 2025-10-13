@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Player } from '@lottiefiles/react-lottie-player';
 import { X } from 'lucide-react';
 
 export default function GiftSection() {
@@ -7,26 +6,21 @@ export default function GiftSection() {
 
   return (
     <section id="gifts" className="py-16 sm:py-20 lg:py-24 px-4 bg-neutral-100 reveal">
-      <div className="max-w-lg mx-auto text-center">
+      <div className="max-w-md mx-auto text-center">
         <div className="flex justify-center mb-6">
-          <Player
-            autoplay
-            loop
-            src="https://assets6.lottiefiles.com/private_files/lf30_y0mCTl.json"
-            style={{ height: '150px', width: '150px' }}
-          />
+          <img src="/images/busta.png" style={{ width: '100px' }} alt="Regali Icona" loading="lazy" decoding="async" fetchpriority="low" />
         </div>
-        <h3 className="font-serif text-2xl md:text-3xl uppercase tracking-wide text-neutral-800 mb-3">
+        <h3 className="font-sans text-xl uppercase tracking-wider text-neutral-800 mb-4">
           REGALI
         </h3>
-        <p className="font-elegant text-neutral-700 text-base sm:text-lg leading-relaxed mb-6">
+        <p className="text-neutral-700 mb-6">
           La cosa più importante è la tua presenza, ma se desideri farci un regalo qui trovi i nostri dati:
         </p>
         
         <button 
           onClick={() => setIsModalOpen(true)}
           className="bg-sage-dark hover:bg-sage text-white font-semibold tracking-wide py-3 px-8 rounded-md shadow-sm transition-all duration-300 ease-in-out transform hover:scale-105"
-          style={{width: '260px', maxWidth: '90%'}}
+          style={{ width: '260px', maxWidth: '90%' }}
         >
           VEDI DATI BANCARI
         </button>
