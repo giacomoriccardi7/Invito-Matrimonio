@@ -43,10 +43,10 @@ export default function EventDetailsSection() {
       <h3 className="font-script text-4xl md:text-5xl text-neutral-800 mb-3">
         {event.title}
       </h3>
-      <p className="font-elegant text-neutral-800 mb-2 text-xl md:text-2xl">
+      <p className="font-elegant text-neutral-800 mb-2 text-lg sm:text-xl md:text-2xl">
         {isChurch ? 'Ti aspettiamo per la cerimonia presso:' : 'Ti aspettiamo per il ricevimento presso:'}
         <br />
-        <span className="italic">{event.location}</span>
+        <span className="italic block w-full whitespace-nowrap overflow-hidden text-ellipsis">{event.location}</span>
       </p>
       <p className="font-elegant text-neutral-800 mb-6 text-2xl md:text-3xl">
         <span className="font-semibold">Ore {event.time}</span>
