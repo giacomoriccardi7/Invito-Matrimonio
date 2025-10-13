@@ -3,7 +3,7 @@
 export default function EventDetailsSection() {
   const ceremony = {
     title: 'Cerimonia',
-    time: '11:00',
+    time: '11:30',
     location: 'Sala Del Regno Dei Testimoni di Geova, Auditorium A',
     address: 'Via Pantanelli, 98, 61025 Montelabbate (PU)',
     mapsUrl: 'https://maps.app.goo.gl/1EZjtM4szqu9uNJD8'
