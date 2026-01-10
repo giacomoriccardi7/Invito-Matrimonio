@@ -37,9 +37,8 @@ export default function RSVPSection() {
       // Validazione lato client con messaggi chiari
       const newErrors: Record<string, string> = {};
       if (!payload.nomeCognome) newErrors.nomeCognome = 'Campo obbligatorio';
-      if (!payload.partecipazione) newErrors.partecipazione = 'Seleziona un\'opzione';
-      // Il messaggio è obbligatorio solo se partecipa
-      if (payload.partecipazione === 'Si' && !payload.messaggio) newErrors.messaggio = 'Campo obbligatorio';
+      if (!payload.partecipazione) newErrors.partecipazione = 'Seleziona un’opzione';
+      if (!payload.messaggio) newErrors.messaggio = 'Campo obbligatorio';
 
       // Se partecipa, validare numeri adulti/bambini
       if (payload.partecipazione === 'Si') {
@@ -174,9 +173,10 @@ export default function RSVPSection() {
                     </label>
                   </div>
                 </div>
-                {(formData.partecipazione === 'Si') && (
+                {(formData.partecipazione === 'Si' || formData.partecipazione === 'No') && (
                   <p className="mt-2 text-sm text-neutral-500">
                     {formData.partecipazione === 'Si' && 'Ottimo! Indica il numero di adulti e bambini e i nomi dei partecipanti (con età dei bambini).'}
+                    {formData.partecipazione === 'No' && 'Grazie per averci avvisato. Puoi lasciare un messaggio per gli sposi.'}
                   </p>
                 )}
                 {errors.partecipazione && (
@@ -276,13 +276,13 @@ export default function RSVPSection() {
 
               <div>
                 <label htmlFor="messaggio" className="block text-neutral-700 font-medium mb-2">
-                  Messaggio per gli Sposi {formData.partecipazione === 'Si' && <span className="text-red-600">*</span>}
+                  Messaggio per gli Sposi <span className="text-red-600">*</span>
                 </label>
                 <textarea
                   id="messaggio"
                   name="messaggio"
                   rows={4}
-                  required={formData.partecipazione === 'Si'}
+                  required
                   value={formData.messaggio}
                   onChange={(e) => setFormData({ ...formData, messaggio: e.target.value })}
                   aria-invalid={Boolean(errors.messaggio)}
