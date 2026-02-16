@@ -4,6 +4,8 @@ import { X } from 'lucide-react';
 
 export default function GiftSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const IBAN = 'IT79W0347501605CC0012827993';
+  const ibanChunks = IBAN.match(/.{1,4}/g) || [IBAN];
 
   return (
     <section id="gifts" className="py-16 sm:py-20 lg:py-24 px-4 bg-neutral-100 reveal">
@@ -43,7 +45,15 @@ export default function GiftSection() {
             </button>
             <h4 className="font-serif text-2xl text-neutral-800 mb-4 text-center">DATI BANCARI</h4>
             <div className="text-left text-neutral-700 space-y-2">
-              <p className="whitespace-nowrap text-sm sm:text-base overflow-x-auto"><strong>IBAN:</strong> IT79W0347501605CC0012827993</p>
+              <p className="text-sm sm:text-base" style={{ overflowWrap: 'anywhere' }}>
+                <strong>IBAN:</strong>{' '}
+                {ibanChunks.map((chunk, i) => (
+                  <span key={i}>
+                    {chunk}
+                    {i < ibanChunks.length - 1 && <wbr />}
+                  </span>
+                ))}
+              </p>
               <p><strong>Intestatario:</strong> Giacomo Riccardi</p>
             </div>
           </div>
