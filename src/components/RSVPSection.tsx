@@ -96,7 +96,7 @@ export default function RSVPSection() {
           Vi chiediamo gentilmente di confermare la vostra partecipazione
         </p>
         <p className="text-center text-neutral-700 font-medium mb-12 animate-fade-in">
-          Entro il 15 Maggio 2026
+          Entro il 10 Giugno 2026
         </p>
 
         {submitStatus === 'success' ? (
